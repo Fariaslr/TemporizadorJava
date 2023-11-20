@@ -1,8 +1,19 @@
 package br.com.view;
 
-import br.com.model.MedidasTempo;
+import br.com.controller.Controller;
+import br.com.model.temporizador.Temporizador;
+import br.com.model.cronometro.MedidaTempo;
+import br.com.model.cronometro.Milesimos;
+import br.com.model.cronometro.Minutos;
+import br.com.model.cronometro.Segundos;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.logging.Level;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.text.DefaultFormatter;
 
 /**
@@ -11,13 +22,35 @@ import javax.swing.text.DefaultFormatter;
  */
 public class VIEWtemporizador extends javax.swing.JFrame {
 
-    MedidasTempo tempo = new MedidasTempo();
+    Segundos segundo;
+    Minutos minuto;
+    Milesimos milesimo;
+    Thread tMin, tSeg, tMil, tTempo;
+    Temporizador temporizador;
+    MedidaTempo tempo;
+    Controller controller;
 
     public VIEWtemporizador() {
         initComponents();
         formattedSpinner(spinnerHoras);
         formattedSpinner(spinnerMinutos);
         formattedSpinner(spinnerSegundos);
+
+        controller = new Controller();
+
+        minuto = new Minutos();
+        tMin = new Thread(minuto);
+
+        segundo = new Segundos();
+        tSeg = new Thread(segundo);
+
+        milesimo = new Milesimos();
+        tMil = new Thread(milesimo);
+
+        tempo = new MedidaTempo();
+
+        temporizador = new Temporizador();
+        tTempo = new Thread(temporizador);
     }
 
     @SuppressWarnings("unchecked")
@@ -25,14 +58,23 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     private void initComponents() {
 
         tabbedTemporizador = new javax.swing.JTabbedPane();
-        jPanel1 = new javax.swing.JPanel();
+        panelTemporizador = new javax.swing.JPanel();
         spinnerHoras = new javax.swing.JSpinner();
         spinnerMinutos = new javax.swing.JSpinner();
         spinnerSegundos = new javax.swing.JSpinner();
-        btnIniciar = new javax.swing.JButton();
-        lbHoras = new javax.swing.JLabel();
-        lblMinutos = new javax.swing.JLabel();
-        lblSegundos = new javax.swing.JLabel();
+        btnIniciarTemporizador = new javax.swing.JButton();
+        lblHora = new javax.swing.JLabel();
+        lblMinuto = new javax.swing.JLabel();
+        lblSegundo = new javax.swing.JLabel();
+        panelCronometro = new javax.swing.JPanel();
+        txtMin = new javax.swing.JTextField();
+        txtSeg = new javax.swing.JTextField();
+        txtMili = new javax.swing.JTextField();
+        btnRedefinir = new javax.swing.JButton();
+        btnIniciarCronometro = new javax.swing.JButton();
+        btnVolta = new javax.swing.JButton();
+        ScrollTable = new javax.swing.JScrollPane();
+        tableCronometro = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -47,68 +89,177 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         spinnerSegundos.setToolTipText("");
         spinnerSegundos.setBorder(null);
 
-        btnIniciar.setText("INICIAR");
-        btnIniciar.addMouseListener(new java.awt.event.MouseAdapter() {
+        btnIniciarTemporizador.setText("INICIAR");
+        btnIniciarTemporizador.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
-                btnIniciarMouseClicked(evt);
+                btnIniciarTemporizadorMouseClicked(evt);
+            }
+        });
+        btnIniciarTemporizador.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIniciarTemporizadorActionPerformed(evt);
             }
         });
 
-        lbHoras.setText("jLabel1");
+        lblHora.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblHora.setText("Horas");
 
-        lblMinutos.setText("jLabel2");
+        lblMinuto.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblMinuto.setText("Minutos");
 
-        lblSegundos.setText("jLabel3");
+        lblSegundo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        lblSegundo.setText("Segundos");
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(spinnerHoras, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnIniciar, javax.swing.GroupLayout.DEFAULT_SIZE, 75, Short.MAX_VALUE)
-                            .addComponent(spinnerMinutos))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(spinnerSegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addGap(23, 23, 23)
-                        .addComponent(lbHoras, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(34, 34, 34)
-                        .addComponent(lblMinutos)
-                        .addGap(37, 37, 37)
-                        .addComponent(lblSegundos)))
-                .addContainerGap(8, Short.MAX_VALUE))
+        javax.swing.GroupLayout panelTemporizadorLayout = new javax.swing.GroupLayout(panelTemporizador);
+        panelTemporizador.setLayout(panelTemporizadorLayout);
+        panelTemporizadorLayout.setHorizontalGroup(
+            panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelTemporizadorLayout.createSequentialGroup()
+                .addGap(30, 30, 30)
+                .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(spinnerHoras, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblHora, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(btnIniciarTemporizador, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(lblMinuto, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)
+                        .addComponent(spinnerMinutos, javax.swing.GroupLayout.DEFAULT_SIZE, 80, Short.MAX_VALUE)))
+                .addGap(18, 18, 18)
+                .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(spinnerSegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(lblSegundo, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(34, 34, 34))
         );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(37, 37, 37)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+        panelTemporizadorLayout.setVerticalGroup(
+            panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelTemporizadorLayout.createSequentialGroup()
+                .addContainerGap(55, Short.MAX_VALUE)
+                .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(spinnerHoras, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(spinnerMinutos, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(spinnerSegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(27, 27, 27)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbHoras, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lblMinutos)
-                    .addComponent(lblSegundos))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
-                .addComponent(btnIniciar)
-                .addGap(18, 18, 18))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblHora)
+                    .addComponent(lblMinuto)
+                    .addComponent(lblSegundo))
+                .addGap(47, 47, 47)
+                .addComponent(btnIniciarTemporizador)
+                .addGap(39, 39, 39))
         );
 
-        tabbedTemporizador.addTab("Temporizador", jPanel1);
+        tabbedTemporizador.addTab("Temporizador", panelTemporizador);
+
+        txtMin.setEditable(false);
+        txtMin.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txtMin.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtMin.setText("0");
+        txtMin.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtMinActionPerformed(evt);
+            }
+        });
+
+        txtSeg.setEditable(false);
+        txtSeg.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txtSeg.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtSeg.setText("0");
+
+        txtMili.setEditable(false);
+        txtMili.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txtMili.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtMili.setText("0");
+
+        btnRedefinir.setText("Redefinir");
+        btnRedefinir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRedefinirActionPerformed(evt);
+            }
+        });
+
+        btnIniciarCronometro.setText("Iniciar");
+        btnIniciarCronometro.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnIniciarCronometroActionPerformed(evt);
+            }
+        });
+
+        btnVolta.setText("Volta");
+        btnVolta.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVoltaActionPerformed(evt);
+            }
+        });
+
+        tableCronometro.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Volta", "Tempo", "Duração Total"
+            }
+        ) {
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        ScrollTable.setViewportView(tableCronometro);
+
+        javax.swing.GroupLayout panelCronometroLayout = new javax.swing.GroupLayout(panelCronometro);
+        panelCronometro.setLayout(panelCronometroLayout);
+        panelCronometroLayout.setHorizontalGroup(
+            panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelCronometroLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(ScrollTable, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
+                .addContainerGap())
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, panelCronometroLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(panelCronometroLayout.createSequentialGroup()
+                        .addComponent(btnRedefinir, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnIniciarCronometro, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnVolta, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(panelCronometroLayout.createSequentialGroup()
+                        .addComponent(txtMin, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtSeg, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtMili, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(35, 35, 35))
+        );
+        panelCronometroLayout.setVerticalGroup(
+            panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(panelCronometroLayout.createSequentialGroup()
+                .addGap(15, 15, 15)
+                .addGroup(panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(txtMin, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSeg, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMili, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnRedefinir)
+                    .addComponent(btnIniciarCronometro)
+                    .addComponent(btnVolta))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(ScrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        tabbedTemporizador.addTab("Cronometro", panelCronometro);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(tabbedTemporizador)
+            .addComponent(tabbedTemporizador, javax.swing.GroupLayout.Alignment.TRAILING)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -119,15 +270,90 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
-    private void btnIniciarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarMouseClicked
-        if (spinnerSegundos.getValue().hashCode() == 0 && spinnerMinutos.getValue().hashCode() == 0 && spinnerHoras.getValue().hashCode() == 0) {
+    private void btnIniciarTemporizadorMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_btnIniciarTemporizadorMouseClicked
+
+    }//GEN-LAST:event_btnIniciarTemporizadorMouseClicked
+
+    private void txtMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMinActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtMinActionPerformed
+
+    private void btnIniciarCronometroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarCronometroActionPerformed
+        if (!tMin.isAlive()) {
+            tMin.start();
+        } else {
+            minuto.resume();
+        }
+        if (!tSeg.isAlive()) {
+            tSeg.start();
+        } else {
+            segundo.resume();
+        }
+        if (!tMil.isAlive()) {
+            tMil.start();
+        } else {
+            milesimo.resume();
+        }
+    }//GEN-LAST:event_btnIniciarCronometroActionPerformed
+
+    private void btnVoltaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVoltaActionPerformed
+        DefaultTableModel tabela = (DefaultTableModel) tableCronometro.getModel();
+        tableCronometro.setRowSorter(new TableRowSorter(tabela));
+
+        tempo.setMinutos(Integer.parseInt(txtMin.getText()));
+        tempo.setSegundos(Integer.parseInt(txtSeg.getText()));
+        tempo.setMilesimos(Integer.parseInt(txtMili.getText()));
+
+        if (tempo.getIndex() == 1) {
+            tabela.setNumRows(0);
+            tabela.addRow(new Object[]{
+                tempo.getIndex(),
+                tempo.formataTempo(),
+                tempo.formataTempo()
+            });
+        } else {
+            try {
+                tabela.addRow(new Object[]{
+                    tempo.getIndex(),
+                    verificarTempoVolta((String) tabela.getValueAt(tabela.getRowCount() - 1, 2), tempo),
+                    tempo.formataTempo()
+                });
+            } catch (ParseException ex) {
+                java.util.logging.Logger.getLogger(VIEWtemporizador.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        tempo.setIndex(tempo.getIndex() + 1);
+    }//GEN-LAST:event_btnVoltaActionPerformed
+
+    private void btnRedefinirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRedefinirActionPerformed
+        try {
+            minuto.suspend();
+            segundo.suspend();
+            milesimo.suspend();
+            txtMili.setText("0");
+
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro " + e);
+        }
+    }//GEN-LAST:event_btnRedefinirActionPerformed
+
+    private void btnIniciarTemporizadorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarTemporizadorActionPerformed
+        if (controller.validaSpinners(spinnerHoras, spinnerMinutos, spinnerSegundos)) {
             JOptionPane.showMessageDialog(this, "Temporizador vazio", "Erro", JOptionPane.ERROR_MESSAGE);
         } else {
-            insereMedidasTempo();
-            tempo.converteEmSegundos();
-            iniciaTemporizador(tempo);
+            temporizador.setHoras(Integer.parseInt(spinnerHoras.getValue().toString()));
+            temporizador.setMinutos(Integer.parseInt(spinnerMinutos.getValue().toString()));
+            temporizador.setSegundos(Integer.parseInt(spinnerSegundos.getValue().toString()));
+            temporizador.calcularSegundosTotais();
+            if (!tTempo.isAlive()) {
+                tTempo.start();
+            } else{
+            }
         }
-    }//GEN-LAST:event_btnIniciarMouseClicked
+
+
+    }//GEN-LAST:event_btnIniciarTemporizadorActionPerformed
 
     public static void main(String args[]) {
         try {
@@ -146,15 +372,24 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnIniciar;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JLabel lbHoras;
-    private javax.swing.JLabel lblMinutos;
-    private javax.swing.JLabel lblSegundos;
-    public javax.swing.JSpinner spinnerHoras;
-    public javax.swing.JSpinner spinnerMinutos;
-    public javax.swing.JSpinner spinnerSegundos;
+    private javax.swing.JScrollPane ScrollTable;
+    private javax.swing.JButton btnIniciarCronometro;
+    private javax.swing.JButton btnIniciarTemporizador;
+    private javax.swing.JButton btnRedefinir;
+    private javax.swing.JButton btnVolta;
+    private javax.swing.JLabel lblHora;
+    private javax.swing.JLabel lblMinuto;
+    private javax.swing.JLabel lblSegundo;
+    private javax.swing.JPanel panelCronometro;
+    private javax.swing.JPanel panelTemporizador;
+    public static javax.swing.JSpinner spinnerHoras;
+    public static javax.swing.JSpinner spinnerMinutos;
+    public static javax.swing.JSpinner spinnerSegundos;
     private javax.swing.JTabbedPane tabbedTemporizador;
+    private javax.swing.JTable tableCronometro;
+    public static javax.swing.JTextField txtMili;
+    public static javax.swing.JTextField txtMin;
+    public static javax.swing.JTextField txtSeg;
     // End of variables declaration//GEN-END:variables
 
     private void formattedSpinner(JSpinner spinner) {
@@ -163,37 +398,12 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         formatter.setAllowsInvalid(false);
     }
 
-    private void insereMedidasTempo() {
-        tempo.setHoras(spinnerHoras.getValue().hashCode());
-        tempo.setMinutos(spinnerMinutos.getValue().hashCode());
-        tempo.setSegundos(spinnerSegundos.getValue().hashCode());
+    private Object verificarTempoVolta(String voltaAnterior, MedidaTempo tempo) throws ParseException {
+        SimpleDateFormat formato = new SimpleDateFormat("mm:ss.SSS");
+        Date DataVoltaAtual = formato.parse(tempo.formataTempo());
+        Date DataVoltaAnterior = formato.parse(voltaAnterior);
+
+        return formato.format(DataVoltaAtual.getTime() - DataVoltaAnterior.getTime());
     }
 
-    private void iniciaTemporizador(MedidasTempo tempo) {
-        int segundos = tempo.getSegundosTotais();
-        int h, m, s, resto;
-        
-        lbHoras.setText(null);
-        lblMinutos.setText(null);
-        lblSegundos.setText(null);
-
-        try {
-            while (segundos >= 0) {
-
-                h = segundos / 3600;
-                resto = segundos % 3600;
-                m = resto / 60;
-                s = resto % 60;
-
-                segundos--;
-
-                System.out.printf(" %2d: %2d: %2d\n", h, m, s);
-                spinnerHoras.setValue(h);
-                spinnerMinutos.setValue(m);
-                spinnerSegundos.setValue(s);
-                Thread.sleep(1000);
-            }
-        } catch (Exception e) {
-        }
-    }
 }
