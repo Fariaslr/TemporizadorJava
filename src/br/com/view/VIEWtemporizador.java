@@ -6,12 +6,16 @@ import br.com.model.cronometro.MedidaTempo;
 import br.com.model.cronometro.Milesimos;
 import br.com.model.cronometro.Minutos;
 import br.com.model.cronometro.Segundos;
+import java.awt.Font;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 import javax.swing.text.DefaultFormatter;
@@ -29,9 +33,12 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     Temporizador temporizador;
     MedidaTempo tempo;
     Controller controller;
+    Font DsDigital = null;
 
-    public VIEWtemporizador() {
+    public VIEWtemporizador() throws Exception {
         initComponents();
+        initFont();
+        setFonts();
         formattedSpinner(spinnerHoras);
         formattedSpinner(spinnerMinutos);
         formattedSpinner(spinnerSegundos);
@@ -67,9 +74,9 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         lblMinuto = new javax.swing.JLabel();
         lblSegundo = new javax.swing.JLabel();
         panelCronometro = new javax.swing.JPanel();
-        txtMin = new javax.swing.JTextField();
-        txtSeg = new javax.swing.JTextField();
-        txtMili = new javax.swing.JTextField();
+        txtMinutos = new javax.swing.JTextField();
+        txtSegundos = new javax.swing.JTextField();
+        txtMilisegundos = new javax.swing.JTextField();
         btnRedefinir = new javax.swing.JButton();
         btnIniciarCronometro = new javax.swing.JButton();
         btnVolta = new javax.swing.JButton();
@@ -134,7 +141,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         panelTemporizadorLayout.setVerticalGroup(
             panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(panelTemporizadorLayout.createSequentialGroup()
-                .addContainerGap(55, Short.MAX_VALUE)
+                .addContainerGap(60, Short.MAX_VALUE)
                 .addGroup(panelTemporizadorLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(spinnerHoras, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(spinnerMinutos, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -151,25 +158,25 @@ public class VIEWtemporizador extends javax.swing.JFrame {
 
         tabbedTemporizador.addTab("Temporizador", panelTemporizador);
 
-        txtMin.setEditable(false);
-        txtMin.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txtMin.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtMin.setText("0");
-        txtMin.addActionListener(new java.awt.event.ActionListener() {
+        txtMinutos.setEditable(false);
+        txtMinutos.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
+        txtMinutos.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtMinutos.setText("0");
+        txtMinutos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtMinActionPerformed(evt);
+                txtMinutosActionPerformed(evt);
             }
         });
 
-        txtSeg.setEditable(false);
-        txtSeg.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txtSeg.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtSeg.setText("0");
+        txtSegundos.setEditable(false);
+        txtSegundos.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txtSegundos.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtSegundos.setText("0");
 
-        txtMili.setEditable(false);
-        txtMili.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
-        txtMili.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        txtMili.setText("0");
+        txtMilisegundos.setEditable(false);
+        txtMilisegundos.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        txtMilisegundos.setHorizontalAlignment(javax.swing.JTextField.CENTER);
+        txtMilisegundos.setText("0");
 
         btnRedefinir.setText("Redefinir");
         btnRedefinir.addActionListener(new java.awt.event.ActionListener() {
@@ -228,11 +235,11 @@ public class VIEWtemporizador extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnVolta, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(panelCronometroLayout.createSequentialGroup()
-                        .addComponent(txtMin, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtMinutos, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtSeg, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(txtSegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtMili, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(txtMilisegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(35, 35, 35))
         );
         panelCronometroLayout.setVerticalGroup(
@@ -240,9 +247,9 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             .addGroup(panelCronometroLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addGroup(panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(txtMin, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtSeg, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtMili, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(txtMinutos, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtSegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(txtMilisegundos, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnRedefinir)
@@ -274,9 +281,9 @@ public class VIEWtemporizador extends javax.swing.JFrame {
 
     }//GEN-LAST:event_btnIniciarTemporizadorMouseClicked
 
-    private void txtMinActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMinActionPerformed
+    private void txtMinutosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtMinutosActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtMinActionPerformed
+    }//GEN-LAST:event_txtMinutosActionPerformed
 
     private void btnIniciarCronometroActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarCronometroActionPerformed
         if (!tMin.isAlive()) {
@@ -300,9 +307,9 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         DefaultTableModel tabela = (DefaultTableModel) tableCronometro.getModel();
         tableCronometro.setRowSorter(new TableRowSorter(tabela));
 
-        tempo.setMinutos(Integer.parseInt(txtMin.getText()));
-        tempo.setSegundos(Integer.parseInt(txtSeg.getText()));
-        tempo.setMilesimos(Integer.parseInt(txtMili.getText()));
+        tempo.setMinutos(Integer.parseInt(txtMinutos.getText()));
+        tempo.setSegundos(Integer.parseInt(txtSegundos.getText()));
+        tempo.setMilesimos(Integer.parseInt(txtMilisegundos.getText()));
 
         if (tempo.getIndex() == 1) {
             tabela.setNumRows(0);
@@ -331,7 +338,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             minuto.suspend();
             segundo.suspend();
             milesimo.suspend();
-            txtMili.setText("0");
+            txtMilisegundos.setText("0");
 
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro " + e);
@@ -348,7 +355,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             temporizador.calcularSegundosTotais();
             if (!tTempo.isAlive()) {
                 tTempo.start();
-            } else{
+            } else {
             }
         }
 
@@ -367,7 +374,11 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(VIEWtemporizador.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         java.awt.EventQueue.invokeLater(() -> {
-            new VIEWtemporizador().setVisible(true);
+            try {
+                new VIEWtemporizador().setVisible(true);
+            } catch (Exception ex) {
+                Logger.getLogger(VIEWtemporizador.class.getName()).log(Level.SEVERE, null, ex);
+            }
         });
     }
 
@@ -387,9 +398,9 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     public static javax.swing.JSpinner spinnerSegundos;
     private javax.swing.JTabbedPane tabbedTemporizador;
     private javax.swing.JTable tableCronometro;
-    public static javax.swing.JTextField txtMili;
-    public static javax.swing.JTextField txtMin;
-    public static javax.swing.JTextField txtSeg;
+    public static javax.swing.JTextField txtMilisegundos;
+    public static javax.swing.JTextField txtMinutos;
+    public static javax.swing.JTextField txtSegundos;
     // End of variables declaration//GEN-END:variables
 
     private void formattedSpinner(JSpinner spinner) {
@@ -406,4 +417,21 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         return formato.format(DataVoltaAtual.getTime() - DataVoltaAnterior.getTime());
     }
 
+    private void initFont() throws Exception {
+        String fontFileName = "/br/com/font/dsdigit.ttf";
+        InputStream is = this.getClass().getResourceAsStream(fontFileName);
+        
+        Font ttfBase = Font.createFont(Font.TRUETYPE_FONT, is);
+        DsDigital = ttfBase.deriveFont(Font.PLAIN, 24);
+    }
+
+    private void setFonts() {
+        fontJTextField(txtMilisegundos);
+        fontJTextField(txtMinutos);
+        fontJTextField(txtSegundos);        
+    }
+    
+    private void fontJTextField(JTextField textField){
+        textField.setFont(DsDigital);
+    }
 }

@@ -28,9 +28,9 @@ public class Minutos implements Runnable {
     @Override
     public void run() {
         try {
-            int i = Integer.parseInt(VIEWtemporizador.txtMin.getText());
+            int i = Integer.parseInt(VIEWtemporizador.txtMinutos.getText());
             for (;;) {
-                VIEWtemporizador.txtMin.setText(i + "");
+                VIEWtemporizador.txtMinutos.setText(i + "");
                 i++;
                 if (i == 59) {
                     i = 0;

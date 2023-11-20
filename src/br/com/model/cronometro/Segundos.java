@@ -29,10 +29,10 @@ public class Segundos implements Runnable {
     public void run() {
 
         try {
-            int i = Integer.parseInt(VIEWtemporizador.txtSeg.getText());
+            int i = Integer.parseInt(VIEWtemporizador.txtSegundos.getText());
             for (;;) {
 
-                VIEWtemporizador.txtSeg.setText(i + "");
+                VIEWtemporizador.txtSegundos.setText(i + "");
                 i++;
                 if (i == 59) {
                     i = 0;

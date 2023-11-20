@@ -28,9 +28,9 @@ public class Milesimos implements Runnable {
     @Override
     public void run() {
         try {
-            int i = Integer.parseInt(VIEWtemporizador.txtMili.getText());
+            int i = Integer.parseInt(VIEWtemporizador.txtMilisegundos.getText());
             for (;;) {
-                VIEWtemporizador.txtMili.setText(i + "");
+                VIEWtemporizador.txtMilisegundos.setText(i + "");
                 i++;
                 if (i == 1000) {
                     i = 0;
