@@ -6,11 +6,10 @@ import br.com.model.cronometro.MedidaTempo;
 import br.com.model.cronometro.Milesimos;
 import br.com.model.cronometro.Minutos;
 import br.com.model.cronometro.Segundos;
+import java.awt.Color;
 import java.awt.Font;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
@@ -39,10 +38,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         initComponents();
         initFont();
         setFonts();
-        formattedSpinner(spinnerHoras);
-        formattedSpinner(spinnerMinutos);
-        formattedSpinner(spinnerSegundos);
-
+        initSpinner();
         controller = new Controller();
 
         minuto = new Minutos();
@@ -85,6 +81,8 @@ public class VIEWtemporizador extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
+
+        panelTemporizador.setBackground(new java.awt.Color(160, 160, 160));
 
         spinnerHoras.setModel(new javax.swing.SpinnerNumberModel(0, 0, 59, 1));
         spinnerHoras.setBorder(null);
@@ -157,6 +155,8 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         );
 
         tabbedTemporizador.addTab("Temporizador", panelTemporizador);
+
+        panelCronometro.setBackground(new java.awt.Color(160, 160, 160));
 
         txtMinutos.setEditable(false);
         txtMinutos.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
@@ -322,7 +322,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             try {
                 tabela.addRow(new Object[]{
                     tempo.getIndex(),
-                    verificarTempoVolta((String) tabela.getValueAt(tabela.getRowCount() - 1, 2), tempo),
+                    controller.verificarTempoVolta((String) tabela.getValueAt(tabela.getRowCount() - 1, 2), tempo),
                     tempo.formataTempo()
                 });
             } catch (ParseException ex) {
@@ -346,20 +346,19 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     }//GEN-LAST:event_btnRedefinirActionPerformed
 
     private void btnIniciarTemporizadorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnIniciarTemporizadorActionPerformed
-        if (controller.validaSpinners(spinnerHoras, spinnerMinutos, spinnerSegundos)) {
-            JOptionPane.showMessageDialog(this, "Temporizador vazio", "Erro", JOptionPane.ERROR_MESSAGE);
-        } else {
-            temporizador.setHoras(Integer.parseInt(spinnerHoras.getValue().toString()));
-            temporizador.setMinutos(Integer.parseInt(spinnerMinutos.getValue().toString()));
-            temporizador.setSegundos(Integer.parseInt(spinnerSegundos.getValue().toString()));
-            temporizador.calcularSegundosTotais();
+        if (!controller.validaSpinners(spinnerHoras, spinnerMinutos, spinnerSegundos)) {
             if (!tTempo.isAlive()) {
+                iniciaTemporizador();
                 tTempo.start();
+            } else if (temporizador.getSegundosTotais() == 0) {
+                mostrarMensagemVazio();
             } else {
+                temporizador.resume();
+                iniciaTemporizador();
             }
+        } else {
+            mostrarMensagemVazio();
         }
-
-
     }//GEN-LAST:event_btnIniciarTemporizadorActionPerformed
 
     public static void main(String args[]) {
@@ -403,24 +402,25 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     public static javax.swing.JTextField txtSegundos;
     // End of variables declaration//GEN-END:variables
 
+    private void initSpinner() {
+        formattedSpinner(spinnerHoras);
+        formattedSpinner(spinnerMinutos);
+        formattedSpinner(spinnerSegundos);
+    }
+
     private void formattedSpinner(JSpinner spinner) {
         JSpinner.DefaultEditor editor = (JSpinner.NumberEditor) spinner.getEditor();
         DefaultFormatter formatter = (DefaultFormatter) editor.getTextField().getFormatter();
         formatter.setAllowsInvalid(false);
-    }
-
-    private Object verificarTempoVolta(String voltaAnterior, MedidaTempo tempo) throws ParseException {
-        SimpleDateFormat formato = new SimpleDateFormat("mm:ss.SSS");
-        Date DataVoltaAtual = formato.parse(tempo.formataTempo());
-        Date DataVoltaAnterior = formato.parse(voltaAnterior);
-
-        return formato.format(DataVoltaAtual.getTime() - DataVoltaAnterior.getTime());
+        spinner.setFont(DsDigital);
+        spinner.setBorder(null);
+        spinner.setBackground(Color.RED);
     }
 
     private void initFont() throws Exception {
         String fontFileName = "/br/com/font/dsdigit.ttf";
         InputStream is = this.getClass().getResourceAsStream(fontFileName);
-        
+
         Font ttfBase = Font.createFont(Font.TRUETYPE_FONT, is);
         DsDigital = ttfBase.deriveFont(Font.PLAIN, 24);
     }
@@ -428,10 +428,31 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     private void setFonts() {
         fontJTextField(txtMilisegundos);
         fontJTextField(txtMinutos);
-        fontJTextField(txtSegundos);        
+        fontJTextField(txtSegundos);
     }
-    
-    private void fontJTextField(JTextField textField){
+
+    private void fontJTextField(JTextField textField) {
         textField.setFont(DsDigital);
+        textField.setBackground(null);
+        textField.setBorder(null);
+    }
+
+    private void iniciaTemporizador() {
+        entradaDados();
+        processamentoDados();
+    }
+
+    private void entradaDados() {
+        temporizador.setHoras(Integer.parseInt(spinnerHoras.getValue().toString()));
+        temporizador.setMinutos(Integer.parseInt(spinnerMinutos.getValue().toString()));
+        temporizador.setSegundos(Integer.parseInt(spinnerSegundos.getValue().toString()));
+    }
+
+    private void processamentoDados() {
+        temporizador.calcularSegundosTotais();
+    }
+
+    private void mostrarMensagemVazio() {
+        JOptionPane.showMessageDialog(this, "Temporizador vazio", "Erro ao iniciar", JOptionPane.ERROR_MESSAGE);
     }
 }

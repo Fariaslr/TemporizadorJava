@@ -49,16 +49,41 @@ public class Temporizador implements Runnable {
         this.segundosTotais = horas * 3600 + minutos * 60 + segundos;
     }
 
+    public boolean isEstaSuspensa() {
+        return estaSuspensa;
+    }
+
+    public void setEstaSuspensa(boolean estaSuspensa) {
+        this.estaSuspensa = estaSuspensa;
+    }
+
+    public long getSegundosTotais() {
+        return segundosTotais;
+    }
+
+    public void setSegundosTotais(long segundosTotais) {
+        this.segundosTotais = segundosTotais;
+    }
+
+    public boolean isFoiTerminada() {
+        return foiTerminada;
+    }
+
+    public void setFoiTerminada(boolean foiTerminada) {
+        this.foiTerminada = foiTerminada;
+    }
+    
     @Override
     public void run() {
         try {
-            while (segundosTotais >= 0) {
+            for (;;) {
                 VIEWtemporizador.spinnerHoras.setValue(segundosTotais / 3600);
-                int resto = (int) (segundosTotais % 3600);
+                int resto = (int) (segundosTotais % 360);
                 VIEWtemporizador.spinnerMinutos.setValue(resto / 60);
                 VIEWtemporizador.spinnerSegundos.setValue(resto % 60);
                 Thread.sleep(1000);
                 segundosTotais--;
+                
                 synchronized (this) {
                     while (estaSuspensa) {
                         wait();
@@ -68,8 +93,7 @@ public class Temporizador implements Runnable {
                     }
                 }
                 if (segundosTotais == 0) {
-                    JOptionPane.showMessageDialog(null, "Tempo encerrado");
-                    break;
+                    suspend();
                 }
             }
         } catch (Exception e) {
