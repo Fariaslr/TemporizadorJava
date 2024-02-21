@@ -8,6 +8,7 @@ import br.com.model.cronometro.Minutos;
 import br.com.model.cronometro.Segundos;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.io.InputStream;
 import java.text.ParseException;
 import java.util.logging.Level;
@@ -37,8 +38,8 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     public VIEWtemporizador() throws Exception {
         initComponents();
         initFont();
-        setFonts();
         initSpinner();
+        iconJFrame();
         controller = new Controller();
 
         minuto = new Minutos();
@@ -80,9 +81,11 @@ public class VIEWtemporizador extends javax.swing.JFrame {
         tableCronometro = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Cronos");
+        setBackground(new java.awt.Color(224, 245, 250));
         setResizable(false);
 
-        panelTemporizador.setBackground(new java.awt.Color(160, 160, 160));
+        panelTemporizador.setBackground(new java.awt.Color(204, 204, 204));
 
         spinnerHoras.setModel(new javax.swing.SpinnerNumberModel(0, 0, 59, 1));
         spinnerHoras.setBorder(null);
@@ -156,7 +159,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
 
         tabbedTemporizador.addTab("Temporizador", panelTemporizador);
 
-        panelCronometro.setBackground(new java.awt.Color(160, 160, 160));
+        panelCronometro.setBackground(new java.awt.Color(204, 204, 204));
 
         txtMinutos.setEditable(false);
         txtMinutos.setFont(new java.awt.Font("Tahoma", 0, 24)); // NOI18N
@@ -253,11 +256,11 @@ public class VIEWtemporizador extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(panelCronometroLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnRedefinir)
-                    .addComponent(btnIniciarCronometro)
-                    .addComponent(btnVolta))
+                    .addComponent(btnVolta)
+                    .addComponent(btnIniciarCronometro, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(ScrollTable, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(11, Short.MAX_VALUE))
         );
 
         tabbedTemporizador.addTab("Cronometro", panelCronometro);
@@ -339,7 +342,6 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             segundo.suspend();
             milesimo.suspend();
             txtMilisegundos.setText("0");
-
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro " + e);
         }
@@ -350,6 +352,7 @@ public class VIEWtemporizador extends javax.swing.JFrame {
             if (!tTempo.isAlive()) {
                 iniciaTemporizador();
                 tTempo.start();
+                configButton();
             } else if (temporizador.getSegundosTotais() == 0) {
                 mostrarMensagemVazio();
             } else {
@@ -420,9 +423,9 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     private void initFont() throws Exception {
         String fontFileName = "/br/com/font/dsdigit.ttf";
         InputStream is = this.getClass().getResourceAsStream(fontFileName);
-
         Font ttfBase = Font.createFont(Font.TRUETYPE_FONT, is);
         DsDigital = ttfBase.deriveFont(Font.PLAIN, 24);
+        setFonts();
     }
 
     private void setFonts() {
@@ -455,4 +458,13 @@ public class VIEWtemporizador extends javax.swing.JFrame {
     private void mostrarMensagemVazio() {
         JOptionPane.showMessageDialog(this, "Temporizador vazio", "Erro ao iniciar", JOptionPane.ERROR_MESSAGE);
     }
+
+    private void iconJFrame() {
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(VIEWtemporizador.class.getResource("/br/com/image/Timer.png")));
+    }
+
+    private void configButton() {
+        btnIniciarTemporizador.setText("PARAR");
+    }
+
 }
